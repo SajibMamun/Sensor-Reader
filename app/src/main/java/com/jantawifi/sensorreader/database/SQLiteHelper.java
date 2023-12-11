@@ -6,23 +6,22 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.jantawifi.sensorreader.sensor.SensorData;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class SQLiteHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "sensor_data.db";
     private static final int DATABASE_VERSION = 1;
 
-    private static final String TABLE_NAME = "sensor_values";
-    private static final String COLUMN_ID = "_id";
-    private static final String COLUMN_SENSOR_TYPE = "sensor_type";
-    private static final String COLUMN_TIMESTAMP = "timestamp";
-    private static final String COLUMN_VALUE = "value";
-
-    private static final String CREATE_TABLE =
-            "CREATE TABLE " + TABLE_NAME + "(" +
-                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-                    COLUMN_SENSOR_TYPE + " INTEGER," +
-                    COLUMN_TIMESTAMP + " INTEGER," +
-                    COLUMN_VALUE + " REAL);";
+    private static final String TABLE_SENSOR_DATA = "sensor_data";
+    private static final String COLUMN_ID = "id";
+    private static final String COLUMN_LIGHT_VALUE = "light_value";
+    private static final String COLUMN_PROXIMITY_VALUE = "proximity_value";
+    private static final String COLUMN_ACCELEROMETER_VALUE = "accelerometer_value";
+    private static final String COLUMN_GYROSCOPE_VALUE = "gyroscope_value";
 
     public SQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -30,30 +29,50 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_TABLE);
+        String createTableQuery = "CREATE TABLE " + TABLE_SENSOR_DATA + " (" +
+                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_LIGHT_VALUE + " REAL, " +
+                COLUMN_PROXIMITY_VALUE + " REAL, " +
+                COLUMN_ACCELEROMETER_VALUE + " REAL, " +
+                COLUMN_GYROSCOPE_VALUE + " REAL)";
+        db.execSQL(createTableQuery);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        onCreate(db);
+        // Handle database schema upgrades if needed
     }
 
-    public void insertData(int sensorType, long timestamp, float value) {
+    public void saveSensorData(float lightValue, float proximityValue, float accelerometerValue, float gyroscopeValue) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(COLUMN_SENSOR_TYPE, sensorType);
-        values.put(COLUMN_TIMESTAMP, timestamp);
-        values.put(COLUMN_VALUE, value);
-        db.insert(TABLE_NAME, null, values);
+        values.put(COLUMN_LIGHT_VALUE, lightValue);
+        values.put(COLUMN_PROXIMITY_VALUE, proximityValue);
+        values.put(COLUMN_ACCELEROMETER_VALUE, accelerometerValue);
+        values.put(COLUMN_GYROSCOPE_VALUE, gyroscopeValue);
+        db.insert(TABLE_SENSOR_DATA, null, values);
         db.close();
     }
 
-    public Cursor getData(int sensorType) {
+    public List<SensorData> getAllSensorData() {
+        List<SensorData> sensorDataList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String[] columns = {COLUMN_ID, COLUMN_SENSOR_TYPE, COLUMN_TIMESTAMP, COLUMN_VALUE};
-        String selection = COLUMN_SENSOR_TYPE + " = ?";
-        String[] selectionArgs = {String.valueOf(sensorType)};
-        return db.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SENSOR_DATA, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                SensorData sensorData = new SensorData();
+                sensorData.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
+                sensorData.setLightValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_LIGHT_VALUE)));
+                sensorData.setProximityValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_PROXIMITY_VALUE)));
+                sensorData.setAccelerometerValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_ACCELEROMETER_VALUE)));
+                sensorData.setGyroscopeValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_GYROSCOPE_VALUE)));
+                sensorDataList.add(sensorData);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return sensorDataList;
     }
 }

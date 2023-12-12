@@ -54,25 +54,4 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public List<SensorData> getAllSensorData() {
-        List<SensorData> sensorDataList = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SENSOR_DATA, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                SensorData sensorData = new SensorData();
-                sensorData.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
-                sensorData.setLightValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_LIGHT_VALUE)));
-                sensorData.setProximityValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_PROXIMITY_VALUE)));
-                sensorData.setAccelerometerValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_ACCELEROMETER_VALUE)));
-                sensorData.setGyroscopeValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_GYROSCOPE_VALUE)));
-                sensorDataList.add(sensorData);
-            } while (cursor.moveToNext());
-        }
-
-        cursor.close();
-        db.close();
-        return sensorDataList;
-    }
 }

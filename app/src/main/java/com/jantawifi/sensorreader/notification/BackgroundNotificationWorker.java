@@ -1,4 +1,4 @@
-package com.jantawifi.sensorreader.sensor;
+package com.jantawifi.sensorreader.notification;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -11,37 +11,31 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import com.jantawifi.sensorreader.R;
-import com.jantawifi.sensorreader.database.SQLiteHelper;
+import com.jantawifi.sensorreader.sensor.SensorReader;
 
-public class SensorWorker extends Worker {
-    private SensorReader sensorReader;
-    private SQLiteHelper dbHelper;
+public class BackgroundNotificationWorker extends Worker {
 
-    public SensorWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public BackgroundNotificationWorker(
+            @NonNull Context context,
+            @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        sensorReader = new SensorReader(context);
-        dbHelper = new SQLiteHelper(context);
     }
 
     @NonNull
     @Override
     public Result doWork() {
-        float lightValue = sensorReader.getLightSensorValue();
-        float proximityValue = sensorReader.getProximitySensorValue();
-        float accelerometerValue = sensorReader.getAccelerometerValue();
-        float gyroscopeValue = sensorReader.getGyroscopeValue();
+        // Get the latest sensor data
+        SensorReader sensorReader = new SensorReader(getApplicationContext());
+        float latestLightValue = sensorReader.getLightSensorValue();
+        float latestProximityValue = sensorReader.getProximitySensorValue();
+        float latestAccelerometerValue = sensorReader.getAccelerometerValue();
+        float latestGyroscopeValue = sensorReader.getGyroscopeValue();
 
-        dbHelper.saveSensorData(lightValue, proximityValue, accelerometerValue, gyroscopeValue);
-
-
-        // Notify the user with the latest data
-        showNotification("Sensor Data Notification", buildNotificationMessage(
-                lightValue, proximityValue, accelerometerValue, gyroscopeValue));
+        // Create and show a notification with the latest sensor data
+       showNotification("Sensor Data Notification", buildNotificationMessage(latestLightValue, latestProximityValue, latestAccelerometerValue, latestGyroscopeValue));
 
         return Result.success();
     }
-
-
 
     private void showNotification(String title, String message) {
         // Create a notification channel (for Android Oreo and above)
@@ -49,7 +43,7 @@ public class SensorWorker extends Worker {
             createNotificationChannel();
         }
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "sensor_notification_channel")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), "background_notification_channel")
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
                 .setContentText(message)
@@ -62,15 +56,14 @@ public class SensorWorker extends Worker {
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
-                    "sensor_notification_channel",
-                    "Sensor Notification Channel",
+                    "background_notification_channel",
+                    "Background Notification Channel",
                     NotificationManager.IMPORTANCE_DEFAULT);
 
             NotificationManager manager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
             manager.createNotificationChannel(channel);
         }
     }
-
     private String buildNotificationMessage(float lightValue, float proximityValue, float accelerometerValue, float gyroscopeValue) {
         return "Latest Sensor Data:\n" +
                 "Light Sensor: " + lightValue + "\n" +
@@ -78,5 +71,4 @@ public class SensorWorker extends Worker {
                 "Accelerometer: " + accelerometerValue + "\n" +
                 "Gyroscope: " + gyroscopeValue;
     }
-
 }

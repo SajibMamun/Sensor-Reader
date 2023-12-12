@@ -52,5 +52,6 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
 
     implementation ("androidx.work:work-runtime:2.7.0")
+    implementation ("androidx.core:core:1.7.0")
 
 }

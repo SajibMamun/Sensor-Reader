@@ -11,6 +11,7 @@
     <uses-feature android:name="android.hardware.sensor.proximity" />
     <uses-feature android:name="android.hardware.sensor.accelerometer" />
     <uses-feature android:name="android.hardware.sensor.gyroscope" />
+
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.NOTIFICATION_POLICY_ACCESS_PACKAGES" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -25,6 +26,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SensorReader"
         tools:targetApi="31">
+
+
+        <activity
+            android:name=".ui.SplashScreen"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+
+
+
         <activity
             android:name=".ui.ChartActivity"
             android:exported="false" />
@@ -33,6 +49,7 @@
             android:name=".sensor.SensorService"
             android:enabled="true"
             android:exported="false" />
+
         <receiver
             android:name=".notification.AppBackgroundReceiver"
             android:enabled="true"
@@ -42,14 +59,12 @@
             </intent-filter>
         </receiver>
 
+
+
         <activity
             android:name=".ui.MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:exported="false">
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
     </application>
 

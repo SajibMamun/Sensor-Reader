@@ -1,16 +1,16 @@
 # Sensor Reader
-# Data read from different Sensor
-# For 4 sensors we have 4 card view
-# Latest value is shown on the card view
-# Database use SQLite
-# Datastore with time and value
-# when a specific sensor card is clicked it filters data and views it in RV for that specific sensor.
-# Users can get notified at different times.
-# App can run in the background.
-# Good UI and User Friendly Design.
+> Data read from different Sensor
+> For 4 sensors we have 4 card view
+> Latest value is shown on the card view
+> Database use SQLite
+> Datastore with time and value
+> when a specific sensor card is clicked it filters data and views it in RV for that specific sensor.
+> Users can get notified at different times.
+> The app can run in the background.
+> Good UI and User Friendly Design.
 
-## Challenge faced:
-# The User gets notified in a specific period and data will be stored in the database in a specifically defined time.
+# Challenge faced:
+> The User gets notified in a specific period and data will be stored in the database in a specifically defined time.
 
 
 # Light View

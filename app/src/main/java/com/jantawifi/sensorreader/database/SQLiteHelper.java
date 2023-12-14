@@ -1,5 +1,6 @@
 package com.jantawifi.sensorreader.database;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -22,6 +23,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String COLUMN_PROXIMITY_VALUE = "proximity_value";
     private static final String COLUMN_ACCELEROMETER_VALUE = "accelerometer_value";
     private static final String COLUMN_GYROSCOPE_VALUE = "gyroscope_value";
+    private static final String COLUMN_TIMESTAMP = "timestamp";
+
 
     public SQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -29,12 +32,14 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createTableQuery = "CREATE TABLE " + TABLE_SENSOR_DATA + " (" +
-                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_LIGHT_VALUE + " REAL, " +
-                COLUMN_PROXIMITY_VALUE + " REAL, " +
-                COLUMN_ACCELEROMETER_VALUE + " REAL, " +
-                COLUMN_GYROSCOPE_VALUE + " REAL)";
+
+            String createTableQuery = "CREATE TABLE " + TABLE_SENSOR_DATA + " (" +
+                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_LIGHT_VALUE + " REAL, " +
+                    COLUMN_PROXIMITY_VALUE + " REAL, " +
+                    COLUMN_ACCELEROMETER_VALUE + " REAL, " +
+                    COLUMN_GYROSCOPE_VALUE + " REAL, " +
+                    COLUMN_TIMESTAMP + " INTEGER)"; // Add the new timestamp column
         db.execSQL(createTableQuery);
     }
 
@@ -50,8 +55,47 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         values.put(COLUMN_PROXIMITY_VALUE, proximityValue);
         values.put(COLUMN_ACCELEROMETER_VALUE, accelerometerValue);
         values.put(COLUMN_GYROSCOPE_VALUE, gyroscopeValue);
+        values.put(COLUMN_TIMESTAMP, System.currentTimeMillis()); // Add timestamp
         db.insert(TABLE_SENSOR_DATA, null, values);
         db.close();
     }
 
+
+
+
+    @SuppressLint("Range")
+    public List<SensorData> getAllSensorData() {
+        List<SensorData> sensorDataList = new ArrayList<>();
+
+        // Select All Query
+        String selectQuery = "SELECT * FROM " + TABLE_SENSOR_DATA;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // Loop through all rows and add to list
+        if (cursor.moveToFirst()) {
+            do {
+                SensorData sensorData = new SensorData();
+                sensorData.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
+                sensorData.setLightValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_LIGHT_VALUE)));
+                sensorData.setProximityValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_PROXIMITY_VALUE)));
+                sensorData.setAccelerometerValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_ACCELEROMETER_VALUE)));
+                sensorData.setGyroscopeValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_GYROSCOPE_VALUE)));
+                sensorData.setTimestamp(cursor.getLong(cursor.getColumnIndex(COLUMN_TIMESTAMP)));
+
+                // Add sensorData to the list
+                sensorDataList.add(sensorData);
+            } while (cursor.moveToNext());
+        }
+
+        // Close the cursor and database
+        cursor.close();
+        db.close();
+
+        return sensorDataList;
+    }
 }
+
+
+

@@ -1,11 +1,14 @@
 package com.jantawifi.sensorreader.database;
 
+import static androidx.constraintlayout.widget.ConstraintLayoutStates.TAG;
+
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.jantawifi.sensorreader.sensor.SensorData;
 
@@ -62,36 +65,47 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
 
 
-
-    @SuppressLint("Range")
     public List<SensorData> getAllSensorData() {
         List<SensorData> sensorDataList = new ArrayList<>();
+        SQLiteDatabase db = null;
+        Cursor cursor = null;
 
-        // Select All Query
-        String selectQuery = "SELECT * FROM " + TABLE_SENSOR_DATA;
+        try {
+            // Select All Query
+            String selectQuery = "SELECT * FROM " + TABLE_SENSOR_DATA;
 
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
+            db = this.getWritableDatabase();
+            cursor = db.rawQuery(selectQuery, null);
 
-        // Loop through all rows and add to list
-        if (cursor.moveToFirst()) {
-            do {
-                SensorData sensorData = new SensorData();
-                sensorData.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
-                sensorData.setLightValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_LIGHT_VALUE)));
-                sensorData.setProximityValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_PROXIMITY_VALUE)));
-                sensorData.setAccelerometerValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_ACCELEROMETER_VALUE)));
-                sensorData.setGyroscopeValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_GYROSCOPE_VALUE)));
-                sensorData.setTimestamp(cursor.getLong(cursor.getColumnIndex(COLUMN_TIMESTAMP)));
+            // Loop through all rows and add to list
+            if (cursor.moveToFirst()) {
+                do {
+                    SensorData sensorData = new SensorData();
+                    sensorData.setId(cursor.getLong(cursor.getColumnIndex(COLUMN_ID)));
+                    sensorData.setLightValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_LIGHT_VALUE)));
+                    sensorData.setProximityValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_PROXIMITY_VALUE)));
+                    sensorData.setAccelerometerValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_ACCELEROMETER_VALUE)));
+                    sensorData.setGyroscopeValue(cursor.getFloat(cursor.getColumnIndex(COLUMN_GYROSCOPE_VALUE)));
+                    sensorData.setTimestamp(cursor.getLong(cursor.getColumnIndex(COLUMN_TIMESTAMP)));
 
-                // Add sensorData to the list
-                sensorDataList.add(sensorData);
-            } while (cursor.moveToNext());
+                    // Add sensorData to the list
+                    sensorDataList.add(sensorData);
+                } while (cursor.moveToNext());
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error retrieving sensor data from the database", e);
+
+        } finally {
+            // Close the cursor and database in the finally block
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+
+            if (db != null && db.isOpen()) {
+                db.close();
+            }
         }
-
-        // Close the cursor and database
-        cursor.close();
-        db.close();
 
         return sensorDataList;
     }

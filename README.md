@@ -19,7 +19,15 @@
 
 # Challenge faced:
 > The User gets notified in a specific period and data will be stored in the database in a specifically defined time.
-> 
+>
+# Learned:
+> How we could manage sensor data.
+>
+> Use of workmanager.
+>
+> Run on the background app and notify the user.
+>
+> Broadcast Concepts.
 
 
 # Light View
